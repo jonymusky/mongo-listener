@@ -118,6 +118,9 @@ class Processor {
     }
 
     function filterNode(node, nodeFilter) {
+      if(node === null) {
+        return;
+      }
       if (Array.isArray(node)) {
         return node.forEach(item => filterNode(item, nodeFilter));
       }
