@@ -131,8 +131,12 @@ class Processor {
           if (typeof node[name] === 'object' &&
             typeof nodeFilter[name] === 'object') {
             filterNode(node[name], nodeFilter[name]);
-            if (Object.keys(node[name]).length < 1) {
-              delete node[name];
+            try{
+              if (node && node[name] && Object.keys(node[name]).length < 1) {
+                delete node[name];
+              }
+            }catch(e){
+              console.log(e);
             }
           }
         }
