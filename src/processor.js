@@ -118,7 +118,7 @@ class Processor {
     }
 
     function filterNode(node, nodeFilter) {
-      if(node === null) {
+      if(node === null || node === undefined) {
         return;
       }
       if (Array.isArray(node)) {
