@@ -50,7 +50,6 @@ class Listener {
       }
 
       var oplog = this.oplog = options.oplog || mongoOplog(this.options.mongo.uri, options);
-
       oplog.on('op', (data) => {
         if (data.ns !== options.ns) {
           return;
@@ -163,7 +162,7 @@ class Listener {
 
   collection() {
     if (!this.readerDb) {
-      this.readerDb = mongo.db(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db);
+      this.readerDb = mongo.db(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db + this.options.mongo.extra);
     }
     return this.readerDb.collection(this.options.mongo.collection);
   }
