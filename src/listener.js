@@ -18,9 +18,7 @@ class Listener {
     this.options = _.merge(_.cloneDeep(defaultOptions), options);
     this.processor = new Processor(options);
     this.processor.setDocGetter((id, done) => {
-      this.result(id).then(function(r){
-          done(r);
-      });
+      this.result(id, done);
     });
   }
 
@@ -55,10 +53,10 @@ class Listener {
       const oplog = this.oplog = options.oplog || MongoOplog(mongoOpLogString, options);
 
       oplog.tail().then(() => {
-        console.log('tailing started')
-      }).catch(err => console.error(err))
-
-      oplog.on('op', (data) => {
+        console.log('tailing started');
+      }).catch(err => console.error(err));
+      const filter = oplog.filter('*.'+this.options.mongo.collection);
+      filter.on('op', (data) => {
         if (data.ns !== options.ns) {
           return;
         }
@@ -167,8 +165,11 @@ class Listener {
   }
 
   async result(id) {
-      const client = new MongoClient(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db);
-      await client.connect();
+      var client = false;
+      if(!client){
+        client = new MongoClient(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db);
+        await client.connect();
+      }
       return await client.db(this.options.mongo.db).collection(this.options.mongo.collection).findOne({ _id: id });
   }
 
