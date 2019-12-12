@@ -4,7 +4,7 @@ var fs = require('fs');
 var os = require('os');
 var http = require('http');
 var _ = require('lodash');
-var mongo = require('mongoskin');
+const {MongoClient} = require('mongodb');
 var mongoCursorProcessing = require('mongo-cursor-processing');
 var MongoOplog = require('mongo-oplog');
 var Timestamp = require('bson-timestamp');
@@ -18,7 +18,9 @@ class Listener {
     this.options = _.merge(_.cloneDeep(defaultOptions), options);
     this.processor = new Processor(options);
     this.processor.setDocGetter((id, done) => {
-      this.collection().findOne(id, done);
+      this.result(id).then(function(r){
+          done(r);
+      });
     });
   }
 
@@ -164,12 +166,10 @@ class Listener {
     readFromFile.call(this);
   }
 
-  collection() {
-    if (!this.readerDb) {
-      this.readerDb = mongo.db(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db + this.options.mongo.extra);
-    }
-
-    return this.readerDb.collection(this.options.mongo.collection);
+  async result(id) {
+      const client = new MongoClient(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db);
+      await client.connect();
+      return await client.db(this.options.mongo.db).collection(this.options.mongo.collection).findOne({ _id: id });
   }
 
   processEntireCollection() {
