@@ -1,6 +1,6 @@
 {
   "name": "mongo-listener",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Mongo OpLog Listener",
   "main": "./src/main",
   "repository": {
@@ -34,5 +34,8 @@
     "mongodb": "2.2.36",
     "mongoskin": "^2.1.0",
     "redis": "^2.4.2"
+  },
+  "engines": {
+    "node": "8.16.0"
   }
 }
