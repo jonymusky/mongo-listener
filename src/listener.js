@@ -18,7 +18,6 @@ class Listener {
     this.options = _.merge(_.cloneDeep(defaultOptions), options);
     this.processor = new Processor(options);
     this.client = false;
-    this.connectClient();
     this.processor.setDocGetter((id, done) => {
       this.result(id, done);
     });
@@ -166,15 +165,18 @@ class Listener {
     readFromFile.call(this);
   }
 
-  async connectClient(){
+  async connectClient(done){
     if(!this.client){
       this.client = new MongoClient(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db);
-      await this.client.connect();
+      await this.client.connect().then(done);
     }
   }
 
   async result(id) {
-      return await this.client.db(this.options.mongo.db).collection(this.options.mongo.collection).findOne({ _id: id });
+    var self = this;
+      await this.connectClient(function(){
+        return self.client.db(self.options.mongo.db).collection(self.options.mongo.collection).findOne({ _id: id });
+      });;
   }
 
   processEntireCollection() {
