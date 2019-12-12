@@ -21,7 +21,7 @@
     "bulk-require": "^0.2.1",
     "codeclimate-test-reporter": "0.0.3",
     "expect.js": "~0.3.1",
-    "fiberglass": "0.0.22",
+    "fiberglass": "0.0.26",
     "growl": "^1.8.1",
     "gulp": "^3.8.8",
     "istanbul": "^0.3.2"
@@ -30,7 +30,7 @@
     "bson-timestamp": "^0.1.2",
     "lodash": "^3.10.1",
     "mongo-cursor-processing": "^1.0.0",
-    "mongo-oplog": "^1.1.0",
+    "mongo-oplog": "^2.1.4",
     "mongodb": "2.2.36",
     "mongoskin": "^2.1.0",
     "redis": "^2.4.2"

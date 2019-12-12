@@ -7,11 +7,13 @@ module.exports = {
     }
   },
   mongo: {
-    uri: process.env.MONGO_URL,
-    uriEntireCollectionRead: process.env.MONGO_FULL_READ_URL,
-    db: process.env.MONGO_DB,
-    collection: process.env.MONGO_COLLECTION,
-    extra: process.env.MONGO_COLLECTION || '?ssl=true',
+    uri: process.env.MONGO_URL ||
+          '',
+        uriEntireCollectionRead: process.env.MONGO_FULL_READ_URL ||
+          '',
+        db: process.env.MONGO_DB || 'orchard-mile-staging',
+        collection: process.env.MONGO_COLLECTION || 'products',
+    extra: process.env.MONGO_EXTRA || '?ssl=true&replicaSet=rs-ds251978',
   },
   redisLastOp: process.env.REDISCLOUD_URL && {
     url: process.env.REDISCLOUD_URL,

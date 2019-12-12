@@ -6,7 +6,7 @@ var http = require('http');
 var _ = require('lodash');
 var mongo = require('mongoskin');
 var mongoCursorProcessing = require('mongo-cursor-processing');
-var mongoOplog = require('mongo-oplog');
+var MongoOplog = require('mongo-oplog');
 var Timestamp = require('bson-timestamp');
 var redis = require('redis');
 var Processor = require('./processor');
@@ -49,7 +49,13 @@ class Listener {
         }
       }
 
-      var oplog = this.oplog = options.oplog || mongoOplog(this.options.mongo.uri, options);
+      var mongoOpLogString = this.options.mongo.uri + '/local?replicaSet=rs-ds251978&ssl=true&authSource=admin';
+      const oplog = this.oplog = options.oplog || MongoOplog(mongoOpLogString, options);
+
+      oplog.tail().then(() => {
+        console.log('tailing started')
+      }).catch(err => console.error(err))
+
       oplog.on('op', (data) => {
         if (data.ns !== options.ns) {
           return;
@@ -76,8 +82,6 @@ class Listener {
       oplog.stop(() => {
         this.log('warning', 'server stopped');
       });
-
-      oplog.tail();
 
       this.startHttpServer();
     });
@@ -164,6 +168,7 @@ class Listener {
     if (!this.readerDb) {
       this.readerDb = mongo.db(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db + this.options.mongo.extra);
     }
+
     return this.readerDb.collection(this.options.mongo.collection);
   }
 
