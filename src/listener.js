@@ -50,17 +50,11 @@ class Listener {
         }
       }
 
-      var mongoOpLogString = this.options.mongo.uri + '/local?replicaSet=rs-ds251978&ssl=true&authSource=admin';
-      const oplog = this.oplog = options.oplog || MongoOplog(mongoOpLogString, options);
+      var mongoOpLogString = this.options.mongo.uri + '/local?'+this.options.mongo.extra+'&authSource=admin';
+      const oplog = this.oplog =  MongoOplog(mongoOpLogString, options);
 
-      oplog.tail().then(() => {
-        console.log('tailing started');
-      }).catch(err => console.error(err));
       const filter = oplog.filter('*.'+this.options.mongo.collection);
       filter.on('op', (data) => {
-        if (data.ns !== options.ns) {
-          return;
-        }
         this.processor.processOp(data, (err) => {
           if (err) {
             this.log(new Error('error processing op:', data));
@@ -80,9 +74,9 @@ class Listener {
         this.log('warning', 'stream ended');
       });
 
-      oplog.stop(() => {
-        this.log('warning', 'server stopped');
-      });
+      oplog.tail().then(() => {
+        console.log('tailing started');
+      }).catch(err => console.error(err));
 
       this.startHttpServer();
     });
@@ -167,7 +161,7 @@ class Listener {
 
   async connectClient(done){
     if(!this.client){
-      this.client = new MongoClient(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db);
+      this.client = new MongoClient(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db + '?'+this.options.mongo.extra);
       await this.client.connect().then(done);
     }
   }
