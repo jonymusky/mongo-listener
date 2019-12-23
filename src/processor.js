@@ -31,9 +31,11 @@ class Processor {
         return done();
       }
       // read full doc from db
-      this.log('partial update:', op.o, ', reading full doc from db:', id);
+      //this.log('partial update:', op.o, ', reading full doc from db:', id);
       return this.readFullDoc(id, (err, doc) => {
         if (err) {
+          console.log('err');
+          console.log(err);
           return done(err);
         }
         this.processDoc(doc, false, done);
