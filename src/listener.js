@@ -18,8 +18,10 @@ class Listener {
     this.options = _.merge(_.cloneDeep(defaultOptions), options);
     this.processor = new Processor(options);
     this.client = false;
+    this.connectClient();
+    var self = this;
     this.processor.setDocGetter((id, done) => {
-      this.result(id, done);
+      self.client.db(self.options.mongo.db).collection(self.options.mongo.collection).findOne(id, done);
     });
   }
 
@@ -159,19 +161,13 @@ class Listener {
     readFromFile.call(this);
   }
 
-  async connectClient(done){
+  async connectClient(){
     if(!this.client){
       this.client = new MongoClient(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db + '?'+this.options.mongo.extra);
-      await this.client.connect().then(done);
+      await this.client.connect();
     }
   }
 
-  async result(id) {
-    var self = this;
-      await this.connectClient(function(){
-        return self.client.db(self.options.mongo.db).collection(self.options.mongo.collection).findOne({ _id: id });
-      });;
-  }
 
   processEntireCollection() {
     var db;
