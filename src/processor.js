@@ -34,8 +34,6 @@ class Processor {
       //this.log('partial update:', op.o, ', reading full doc from db:', id);
       return this.readFullDoc(id, (err, doc) => {
         if (err) {
-          console.log('err');
-          console.log(err);
           return done(err);
         }
         this.processDoc(doc, false, done);
@@ -76,6 +74,7 @@ class Processor {
   filterField(field) {
     var fieldPath = field.split(/\.[\$\d]*\.?/g);
     var filterNode = this.options.filter;
+
     while (fieldPath.length) {
       var member = fieldPath.shift();
       if (!filterNode[member]) {
@@ -98,7 +97,8 @@ class Processor {
         // not partial update, always pass
         return op;
       }
-      if (name === '$set' || name === '$unset') {
+
+      if (name === '$set' || name === '$unset' || name === '$v') {
         for (var field in op.o[name]) {
           if (this.filterField(field)) {
             // this field passes the filter, update is needed
@@ -144,7 +144,6 @@ class Processor {
         }
       }
     }
-
     filterNode(doc, this.options.filter);
     if (Object.keys(doc).length < 1) {
       return;
