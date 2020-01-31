@@ -16,7 +16,7 @@ class Listener {
 
   constructor(options) {
     this.options = _.merge(_.cloneDeep(defaultOptions), options);
-    this.processor = new Processor(this.options);
+    this.processor = new Processor(options);
     this.client = false;
     this.connectClient();
     var self = this;
@@ -52,7 +52,7 @@ class Listener {
         }
       }
 
-      var mongoOpLogString = this.options.mongo.uri + '/local?'+this.options.mongo.extra;
+      var mongoOpLogString = this.options.mongo.uri + '/local?'+this.options.mongo.extra+'&authSource=admin';
       const oplog = this.oplog =  MongoOplog(mongoOpLogString, options);
 
       const filter = oplog.filter('*.'+this.options.mongo.collection);
