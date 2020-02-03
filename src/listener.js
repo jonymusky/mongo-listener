@@ -16,7 +16,7 @@ class Listener {
 
   constructor(options) {
     this.options = _.merge(_.cloneDeep(defaultOptions), options);
-    this.processor = new Processor(options);
+    this.processor = new Processor(this.options);
     this.client = false;
     this.connectClient();
     var self = this;
@@ -33,7 +33,11 @@ class Listener {
   }
 
   start() {
-    var options = { ns: this.options.mongo.db + '.' + this.options.mongo.collection };
+    var options = { ns: this.options.mongo.db + '.' + this.options.mongo.collection,
+    ssl: true,
+    sslValidate: true,
+    poolSize: 1,
+    reconnectTries: 1};
     this.getLastOpTimestamp((err, since) => {
       if (err) {
         this.log(new Error('error reading lastop: ' + err));
@@ -52,7 +56,7 @@ class Listener {
         }
       }
 
-      var mongoOpLogString = this.options.mongo.uri + '/local?'+this.options.mongo.extra+'&authSource=admin';
+      var mongoOpLogString = this.options.mongo.uri + '/local?'+this.options.mongo.extra+'&authSource=admin&ssl=true&replicaSet=orchard-mile-shard-0';
       const oplog = this.oplog =  MongoOplog(mongoOpLogString, options);
 
       const filter = oplog.filter('*.'+this.options.mongo.collection);
@@ -163,7 +167,10 @@ class Listener {
 
   async connectClient(){
     if(!this.client){
-      this.client = new MongoClient(this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db + '?'+this.options.mongo.extra);
+      console.log('here');
+      const uri = this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db + '?'+this.options.mongo.extra;
+      this.client = new MongoClient(uri, { useNewUrlParser: true });
+
       await this.client.connect();
     }
   }
