@@ -56,7 +56,7 @@ class Listener {
         }
       }
 
-      var mongoOpLogString = this.options.mongo.uri + '/local?'+this.options.mongo.extra+'&authSource=admin&ssl=true&replicaSet=orchard-mile-shard-0';
+      var mongoOpLogString = this.options.mongo.uri + '/local?'+this.options.mongo.extra;
       const oplog = this.oplog =  MongoOplog(mongoOpLogString, options);
 
       const filter = oplog.filter('*.'+this.options.mongo.collection);
