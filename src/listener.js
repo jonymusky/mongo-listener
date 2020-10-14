@@ -33,11 +33,13 @@ class Listener {
   }
 
   start() {
-    var options = { ns: this.options.mongo.db + '.' + this.options.mongo.collection,
-    ssl: true,
-    sslValidate: true,
-    poolSize: 1,
-    reconnectTries: 1};
+    var options = {
+      ns: this.options.mongo.db + '.' + this.options.mongo.collection,
+      ssl: true,
+      sslValidate: true,
+      poolSize: 1,
+      reconnectTries: 1
+    };
     this.getLastOpTimestamp((err, since) => {
       if (err) {
         this.log(new Error('error reading lastop: ' + err));
@@ -167,9 +169,8 @@ class Listener {
 
   async connectClient(){
     if(!this.client){
-      console.log('here');
       const uri = this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db + '?'+this.options.mongo.extra;
-      this.client = new MongoClient(uri, { useNewUrlParser: true });
+      this.client = new MongoClient(uri, { useNewUrlParser: true,useUnifiedTopology: true });
 
       await this.client.connect();
     }
