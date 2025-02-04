@@ -35,10 +35,8 @@ class Listener {
   start() {
     var options = {
       ns: this.options.mongo.db + '.' + this.options.mongo.collection,
-      ssl: true,
-      sslValidate: true,
       poolSize: 1,
-      reconnectTries: 1
+      reconnectTries: 2
     };
     this.getLastOpTimestamp((err, since) => {
       if (err) {
