@@ -168,7 +168,15 @@ class Listener {
   async connectClient(){
     if(!this.client){
       const uri = this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db + '?'+this.options.mongo.extra;
-      this.client = new MongoClient(uri, { useNewUrlParser: true,useUnifiedTopology: true });
+      this.client = new MongoClient(uri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        replicaSet: this.options.mongo.replicaSet,
+        authSource: this.options.mongo.authSource,
+        retryWrites: true,
+        writeConcern: 'majority',
+        ssl: true
+      });
 
       await this.client.connect();
     }
