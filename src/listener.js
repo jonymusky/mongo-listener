@@ -6,7 +6,6 @@ var http = require('http');
 var _ = require('lodash');
 const {MongoClient} = require('mongodb');
 var mongoCursorProcessing = require('mongo-cursor-processing');
-var MongoOplog = require('mongo-oplog');
 var Timestamp = require('bson-timestamp');
 var redis = require('redis');
 var Processor = require('./processor');
@@ -56,34 +55,7 @@ class Listener {
         }
       }
 
-      var mongoOpLogString = this.options.mongo.uri + '/local?'+this.options.mongo.extra;
-      const oplog = this.oplog =  MongoOplog(mongoOpLogString, options);
-
-      const filter = oplog.filter('*.'+this.options.mongo.collection);
-      filter.on('op', (data) => {
-        this.processor.processOp(data, (err) => {
-          if (err) {
-            this.log(new Error('error processing op:', data));
-            this.log(err);
-          }
-        });
-        if (data && data.ts) {
-          this.setLastOpTimestamp(data.ts);
-        }
-      });
-
-      oplog.on('error', (error) => {
-        this.log(error);
-      });
-
-      oplog.on('end', () => {
-        this.log('warning', 'stream ended');
-      });
-
-      oplog.tail().then(() => {
-        console.log('tailing started');
-      }).catch(err => console.error(err));
-
+      this.watchCollection();
       this.startHttpServer();
     });
   }
@@ -167,7 +139,7 @@ class Listener {
 
   async connectClient(){
     if(!this.client){
-      const uri = this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db + '?'+this.options.mongo.extra;
+      const uri = this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db;
       this.client = new MongoClient(uri, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -182,6 +154,45 @@ class Listener {
     }
   }
 
+  async watchCollection() {
+    try {
+      // Define a pipeline to filter changes
+      const pipeline = [
+        { $match: { 'ns.coll': this.options.mongo.collection } }
+      ];
+
+      const changeStream = this.client
+        .db(this.options.mongo.db)
+        .collection(this.options.mongo.collection)
+        .watch(pipeline, {
+          fullDocument: 'updateLookup'
+        });
+      changeStream.on('change', (changeEvent) => {
+        const operationType = changeEvent.operationType;
+        const fullDoc = changeEvent.fullDocument;
+
+        this.processor.processDoc(fullDoc, false, (err) => {
+          if (err) {
+            this.log(new Error('error processing change:', changeEvent));
+            this.log(err);
+          }
+        });
+        if (changeEvent._id) {
+          this.setLastOpTimestamp(changeEvent._id);
+        }
+      });
+
+      // Handle errors
+      changeStream.on('error', (error) => {
+        this.log(error);
+      });
+
+      this.log('info', 'Change stream started');
+
+    } catch (err) {
+      this.log('error', 'Failed to start change stream:', err);
+    }
+  }
 
   processEntireCollection() {
     var db;
