@@ -1,6 +1,6 @@
 {
   "name": "mongo-listener",
-  "version": "0.0.26",
+  "version": "0.0.27",
   "description": "Mongo OpLog Listener",
   "main": "./src/main",
   "repository": {
@@ -31,7 +31,7 @@
     "lodash": "^4.17.21",
     "mongo-cursor-processing": "^1.0.0",
     "mongo-oplog": "^2.1.4",
-    "mongodb": "^6.13.0",
+    "mongodb": "^4.17.2",
     "redis": "^3.1.2"
   }
 }
