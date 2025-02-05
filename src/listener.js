@@ -142,7 +142,6 @@ class Listener {
       const uri = this.options.mongo.uriEntireCollectionRead + '/' + this.options.mongo.db;
       this.client = new MongoClient(uri, {
         useNewUrlParser: true,
-        useUnifiedTopology: true,
         replicaSet: this.options.mongo.replicaSet,
         authSource: this.options.mongo.authSource,
         retryWrites: true,
@@ -177,8 +176,8 @@ class Listener {
             this.log(err);
           }
         });
-        if (changeEvent._id) {
-          this.setLastOpTimestamp(changeEvent._id);
+        if (changeEvent.wallTime) {
+          this.setLastOpTimestamp((new Date(changeEvent.wallTime)).getTime());
         }
       });
 
