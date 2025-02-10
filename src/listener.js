@@ -177,57 +177,68 @@ class Listener {
               // For updates, only process if there’s at least one updated field that is not in the ignored list.
               {
                 $expr: {
-                  $gt: [
-                    {
-                      $size: {
-                        $filter: {
-                          input: {
-                            $objectToArray: '$updateDescription.updatedFields',
-                          },
-                          as: 'field',
-                          cond: {
-                            $not: {
-                              $or: [
-                                {
-                                  $regexMatch: {
-                                    input: '$$field.k',
-                                    regex: /^modifiedAt$/,
+                  if: {
+                    $or: [
+                      { $eq: ['$updateDescription.updatedFields', null] },
+                      { $not: ['$updateDescription.updatedFields'] },
+                    ],
+                  },
+                  then: false,
+                  else: {
+                    $gt: [
+                      {
+                        $size: {
+                          $filter: {
+                            input: {
+                              $objectToArray:
+                                '$updateDescription.updatedFields',
+                            },
+                            as: 'field',
+                            cond: {
+                              $not: {
+                                $or: [
+                                  {
+                                    $regexMatch: {
+                                      input: '$$field.k',
+                                      regex: /^modifiedAt$/,
+                                    },
                                   },
-                                },
-                                {
-                                  $regexMatch: {
-                                    input: '$$field.k',
-                                    regex: /^styles\.\d+\.modifiedAt$/,
+                                  {
+                                    $regexMatch: {
+                                      input: '$$field.k',
+                                      regex: /^styles\.\d+\.modifiedAt$/,
+                                    },
                                   },
-                                },
-                                {
-                                  $regexMatch: {
-                                    input: '$$field.k',
-                                    regex: /^styles\.\d+\.crawlerInfo\.jobId$/,
+                                  {
+                                    $regexMatch: {
+                                      input: '$$field.k',
+                                      regex:
+                                        /^styles\.\d+\.crawlerInfo\.jobId$/,
+                                    },
                                   },
-                                },
-                                {
-                                  $regexMatch: {
-                                    input: '$$field.k',
-                                    regex:
-                                      /^styles\.\d+\.crawlerInfo\.lastCrawled$/,
+                                  {
+                                    $regexMatch: {
+                                      input: '$$field.k',
+                                      regex:
+                                        /^styles\.\d+\.crawlerInfo\.lastCrawled$/,
+                                    },
                                   },
-                                },
-                                {
-                                  $regexMatch: {
-                                    input: '$$field.k',
-                                    regex:
-                                      /^styles\.\d+\.variants\.\d+\.stockUpdatedAt$/,
+                                  {
+                                    $regexMatch: {
+                                      input: '$$field.k',
+                                      regex:
+                                        /^styles\.\d+\.variants\.\d+\.stockUpdatedAt$/,
+                                    },
                                   },
-                                },
-                              ],
+                                ],
+                              },
                             },
                           },
                         },
                       },
-                    },
-                    0,
-                  ],
+                      0,
+                    ],
+                  },
                 },
               },
             ],
